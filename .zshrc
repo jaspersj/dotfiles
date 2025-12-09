@@ -1,4 +1,79 @@
 # -----------------------------------------
+# Custom Functions
+# -----------------------------------------
+pkgsearch() {
+    if [ -z "$1" ]; then
+        echo "Usage: pkgsearch <package-name>"
+        return 1
+    fi
+
+    PKG="$1"
+
+    echo "🔍 Searching for: $PKG"
+    echo "-----------------------------------"
+
+    ########################################
+    # APT SEARCH
+    ########################################
+    if command -v apt-cache >/dev/null 2>&1; then
+        echo "📦 APT (deb packages):"
+        APT_RESULTS=$(apt-cache search "$PKG" 2>/dev/null | head -20)
+        if [ -n "$APT_RESULTS" ]; then
+            echo "$APT_RESULTS"
+            echo ""
+            echo "➡️ Install with APT:"
+            echo "   sudo apt install <exact-package-name>"
+        else
+            echo "(no matches)"
+        fi
+    else
+        echo "📦 APT not available."
+    fi
+    echo "-----------------------------------"
+
+    ########################################
+    # SNAP SEARCH
+    ########################################
+    if command -v snap >/dev/null 2>&1; then
+        echo "📦 Snap packages:"
+        SNAP_RESULTS=$(snap find "$PKG" 2>/dev/null | head -20)
+        if echo "$SNAP_RESULTS" | grep -q "$PKG"; then
+            echo "$SNAP_RESULTS"
+            echo ""
+            echo "➡️ Install with Snap:"
+            echo "   sudo snap install <exact-package-name>"
+        else
+            echo "(no matches)"
+        fi
+    else
+        echo "📦 Snap not installed."
+    fi
+    echo "-----------------------------------"
+
+    ########################################
+    # FLATPAK SEARCH
+    ########################################
+    if command -v flatpak >/dev/null 2>&1; then
+        echo "📦 Flatpak packages:"
+        FLAT_RESULTS=$(flatpak search "$PKG" 2>/dev/null | head -20)
+        if [ -n "$FLAT_RESULTS" ]; then
+            echo "$FLAT_RESULTS"
+            echo ""
+            echo "➡️ Install with Flatpak:"
+            echo "   flatpak install <remote> <package-id>"
+        else
+            echo "(no matches)"
+        fi
+    else
+        echo "📦 Flatpak not installed."
+    fi
+
+    echo "-----------------------------------"
+    echo "✅ Search complete."
+}
+
+
+# -----------------------------------------
 # Oh My Zsh Setup
 # -----------------------------------------
 export ZSH="$HOME/.oh-my-zsh"
